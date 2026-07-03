@@ -1,0 +1,9 @@
+# Normalize line endings to LF in the repository for all text files.
+# The scaffold assets (.md/.ps1) are inlined verbatim into main.js at build
+# time, so keeping them LF makes the build output reproducible on any platform.
+* text=auto eol=lf
+
+# Explicitly binary (never touch): none currently, but guard common cases.
+*.png binary
+*.jpg binary
+*.gif binary
