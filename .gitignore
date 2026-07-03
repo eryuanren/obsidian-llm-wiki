@@ -1,7 +1,9 @@
-# build / deps
+# deps
 node_modules/
-main.js
 *.js.map
+
+# NOTE: main.js (the built bundle) IS committed so users can download and
+# install without a build step. Regenerate it with `npm run build`.
 
 # obsidian test vault
 test-vault/
