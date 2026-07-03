@@ -12,6 +12,19 @@ It implements the [LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555
 rather than re-deriving knowledge from raw documents on every query (RAG), an agent (**Sunny**)
 compiles your sources once into a structured, interlinked wiki and keeps it current.
 
+## Install
+
+**Manual (simplest):**
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the
+   [latest release](../../releases/latest).
+2. Put them in your vault at `.obsidian/plugins/llm-wiki/`.
+3. In Obsidian: Settings → Community plugins → turn off Restricted Mode, then enable **LLM Wiki**.
+
+**Via BRAT** (auto-updates): install the
+[BRAT](https://github.com/TfTHacker/obsidian42-brat) plugin, then "Add beta plugin" and paste
+this repo's URL.
+
 ## What it does
 
 **Set up LLM Wiki in this vault** creates:
