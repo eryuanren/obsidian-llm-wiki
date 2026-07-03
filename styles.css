@@ -1,0 +1,47 @@
+/* LLM Wiki plugin styles */
+
+.llm-wiki-modal .llm-wiki-section-title {
+	margin-top: 1em;
+	margin-bottom: 0.35em;
+	font-size: var(--font-ui-small);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--text-muted);
+}
+
+.llm-wiki-modal ul.llm-wiki-list {
+	margin: 0 0 0.5em 0;
+	padding-left: 1.25em;
+}
+
+.llm-wiki-modal ul.llm-wiki-list li {
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	line-height: 1.5;
+}
+
+.llm-wiki-modal .llm-wiki-muted {
+	color: var(--text-muted);
+}
+
+.llm-wiki-modal .llm-wiki-warning {
+	color: var(--text-warning);
+}
+
+.llm-wiki-modal .llm-wiki-count {
+	font-weight: var(--font-semibold);
+}
+
+.llm-wiki-prompt-textarea {
+	width: 100%;
+	min-height: 8em;
+	resize: vertical;
+	font-family: var(--font-text);
+}
+
+.llm-wiki-button-row {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5em;
+	margin-top: 1em;
+}

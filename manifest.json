@@ -1,0 +1,10 @@
+{
+	"id": "llm-wiki",
+	"name": "LLM Wiki",
+	"version": "1.0.0",
+	"minAppVersion": "1.4.16",
+	"description": "Scaffold your vault into an LLM-maintained wiki (the LLM Wiki pattern) and run the convert/ingest/lint pipeline through OpenCode.",
+	"author": "Yuan Ren",
+	"authorUrl": "",
+	"isDesktopOnly": true
+}
