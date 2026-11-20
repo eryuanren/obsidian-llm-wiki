@@ -1,18 +1,18 @@
 #!/usr/bin/env pwsh
 # DEPRECATED: kept for backward compatibility. Use ./tools/ingest.ps1 instead.
-# This shim now forwards to ingest.ps1, which ingests everything queued in inbox/.
+# This shim forwards to ingest.ps1, which ingests what is queued in inbox/.
 
 param(
-    [switch]$All,           # accepted but ignored; ingest.ps1 always processes the whole inbox
+    [switch]$All,           # accepted but ignored; ingest.ps1 always processes the queue
     [string]$File,
-    [string]$SunnyCmd = "sunny"
+    [string]$SunnyCmd = ""
 )
 
 Write-Host "invoke-sunny.ps1 is deprecated -> forwarding to ingest.ps1" -ForegroundColor Yellow
 
-if ($File) {
-    & "$PSScriptRoot\ingest.ps1" -File $File -SunnyCmd $SunnyCmd
-} else {
-    & "$PSScriptRoot\ingest.ps1" -SunnyCmd $SunnyCmd
-}
+$forward = @{}
+if ($File)     { $forward["File"] = $File }
+if ($SunnyCmd) { $forward["SunnyCmd"] = $SunnyCmd }
+
+& "$PSScriptRoot\ingest.ps1" @forward
 exit $LASTEXITCODE

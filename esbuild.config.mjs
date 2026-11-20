@@ -19,6 +19,9 @@ const context = await esbuild.context({
 	loader: {
 		".md": "text",
 		".ps1": "text",
+		// The scaffolded opencode.json is a template we copy into the vault verbatim,
+		// not config for this bundle - so it is inlined as text, not parsed.
+		".json": "text",
 	},
 	external: [
 		"obsidian",

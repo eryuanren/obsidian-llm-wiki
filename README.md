@@ -5,8 +5,11 @@ whole convert → ingest → archive pipeline through [OpenCode](https://github.
 
 This is the Obsidian-native version of the `init-wiki.ps1` setup script: instead of running
 PowerShell, you run a command inside Obsidian and the plugin scaffolds the entire structure
-(folders, the `AGENTS.md` schema, the `tools/` scripts, and fresh wiki seeds) directly into
-your vault using Obsidian's own file API — cross-platform, no shell required.
+(folders, the schema, Sunny's custom commands, the `tools/` scripts, and fresh wiki seeds)
+directly into your vault using Obsidian's own file API.
+
+**Setup** needs nothing but Obsidian. The **pipeline scripts** under `tools/` are PowerShell,
+so running them outside Windows needs `pwsh` installed.
 
 It implements the [LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f):
 rather than re-deriving knowledge from raw documents on every query (RAG), an agent (**Sunny**)
@@ -32,12 +35,17 @@ this repo's URL.
 ```
 raw/            immutable source files (any type); assets/ for images
 inbox/          converted markdown awaiting ingest (the queue)
-processed/      converted markdown already ingested
+processed/      ingested sources — kept, and read back when detail is needed
 wiki/           the knowledge base Sunny maintains
   entities/  concepts/  sources/  synthesis/
   index.md   log.md   processed.md
 tools/          the PowerShell pipeline scripts
-AGENTS.md       the schema — how Sunny ingests, answers, and lints
+.llm-wiki/      pipeline state (queue manifest, ingest status)
+.opencode/      the schema and Sunny's custom commands (plugin-owned)
+  llm-wiki/schema.md    page conventions + INGEST/QUERY/LINT/BUILD
+  commands/*.md         /wiki-ingest, /wiki-query, /wiki-lint, /wiki-build
+  opencode.json         loads the schema as a project instruction
+AGENTS.md       YOUR rules — seeded once, never overwritten
 WORKFLOW.md     the end-to-end workflow guide
 README.md       vault-level readme
 ```
@@ -46,9 +54,23 @@ Then the pipeline commands hand a prompt to Sunny through the OpenCode plugin:
 
 - **Build wiki (convert → ingest → archive)** — the full pipeline in one prompt.
 - **Ingest inbox into the wiki** — ingest only, so you can review before archiving.
+- **Ask the wiki** — a question answered from the wiki, falling back to the cited source.
 - **Lint the wiki** — health check (orphans, contradictions, stale claims, gaps).
 - **Send a custom prompt to Sunny** — ask anything against the wiki.
 - **Open OpenCode panel** — convenience toggle.
+
+### Where the rules live
+
+The schema is split in two, so updating the plugin can't overwrite work you've done:
+
+- **`AGENTS.md` is yours.** Seeded once with a pointer to the schema and a *House rules*
+  section. Never overwritten.
+- **`.opencode/llm-wiki/schema.md` is the plugin's.** Page conventions and the four
+  workflows. Replaced on update.
+
+The long procedures live in `.opencode/commands/` as sunny custom commands, so they load
+when invoked rather than sitting in every conversation's context. The scripts run them
+with `sunny run --command wiki-ingest`.
 
 ## Commands & ribbon
 
@@ -79,9 +101,14 @@ The setup summary shows a live checklist of these.
 ## Safety
 
 - `raw/` sources and existing `wiki/` pages are **never** modified.
-- Re-running setup refreshes only the methodology/tool files (`AGENTS.md`, `WORKFLOW.md`,
-  `tools/*`). Your `wiki/index.md`, `log.md`, and `processed.md` are **never overwritten**, so
-  a re-run can't wipe an existing wiki.
+- Re-running setup refreshes only plugin-owned files (`.opencode/llm-wiki/schema.md`,
+  `.opencode/commands/*`, `WORKFLOW.md`, `README.md`, `tools/*`). Your `AGENTS.md`,
+  `.opencode/opencode.json`, `wiki/index.md`, `log.md` and `processed.md` are **never
+  overwritten**, so a re-run can't wipe an existing wiki or the rules you wrote.
+- Nothing is archived on a clean exit code alone. Sunny records per-file results in
+  `.llm-wiki/ingest-status.json`, and only files it marked `done` are moved to
+  `processed/` — a source the agent skipped stays in the queue instead of being filed
+  away as if it had been ingested.
 
 ## Development
 

@@ -23,10 +23,14 @@ export class ConfirmOverwriteModal extends Modal {
 
 		const ul = contentEl.createEl("ul");
 		ul.createEl("li", {
-			text: "Will overwrite: AGENTS.md, WORKFLOW.md, README.md, and every tools/ script.",
+			text:
+				"Will overwrite: the schema and commands under .opencode/, WORKFLOW.md, " +
+				"README.md, and every tools/ script.",
 		});
 		ul.createEl("li", {
-			text: "Will NOT touch: your raw/ sources, wiki pages, or wiki/index.md, log.md, and processed.md.",
+			text:
+				"Will NOT touch: AGENTS.md (your own rules live there), .opencode/opencode.json, " +
+				"your raw/ sources, your wiki pages, or wiki/index.md, log.md and processed.md.",
 		});
 
 		new Setting(contentEl)
@@ -153,28 +157,42 @@ export class SetupSummaryModal extends Modal {
 }
 
 /** Prompt the user for a free-form message to send to Sunny. */
+export interface PromptModalCopy {
+	title: string;
+	blurb: string;
+	placeholder: string;
+}
+
+const DEFAULT_PROMPT_COPY: PromptModalCopy = {
+	title: "Send a prompt to Sunny",
+	blurb: 'Sunny answers from the wiki and can run the tools. e.g. "Compare X and Y" or "lint the wiki".',
+	placeholder: "Type your message…",
+};
+
 export class CustomPromptModal extends Modal {
 	private onSubmit: (prompt: string) => void;
+	private copy: PromptModalCopy;
 
-	constructor(app: App, onSubmit: (prompt: string) => void) {
+	constructor(app: App, onSubmit: (prompt: string) => void, copy?: Partial<PromptModalCopy>) {
 		super(app);
 		this.onSubmit = onSubmit;
+		this.copy = { ...DEFAULT_PROMPT_COPY, ...(copy ?? {}) };
 		this.modalEl.addClass("llm-wiki-modal");
 	}
 
 	onOpen(): void {
 		const { contentEl } = this;
-		this.titleEl.setText("Send a prompt to Sunny");
+		this.titleEl.setText(this.copy.title);
 
 		contentEl.createEl("p", {
-			text: "Sunny answers from the wiki and can run the tools. e.g. \"Compare X and Y\" or \"lint the wiki\".",
+			text: this.copy.blurb,
 			cls: "llm-wiki-muted",
 		});
 
 		const textarea = contentEl.createEl("textarea", {
 			cls: "llm-wiki-prompt-textarea",
 		});
-		textarea.setAttr("placeholder", "Type your message…");
+		textarea.setAttr("placeholder", this.copy.placeholder);
 		window.setTimeout(() => textarea.focus(), 0);
 
 		const submit = () => {
