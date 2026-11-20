@@ -11,7 +11,12 @@ import {
 	SetupSummaryModal,
 } from "./modals";
 import { OPENCODE_ID, isOpencodeEnabled, isOpencodeInstalled, runPrompt } from "./opencode";
-import { BUILD_PROMPT, INGEST_PROMPT, LINT_PROMPT } from "./prompts";
+import {
+	BUILD_PROMPT,
+	INGEST_PROMPT,
+	LINT_PROMPT,
+	QUERY_PROMPT_PREFIX,
+} from "./prompts";
 
 const RIBBON_ICON = "book-open";
 
@@ -46,6 +51,24 @@ export default class LlmWikiPlugin extends Plugin {
 			id: "lint-wiki",
 			name: "Lint the wiki",
 			callback: () => this.runPipeline(LINT_PROMPT, "Lint"),
+		});
+
+		this.addCommand({
+			id: "query-wiki",
+			name: "Ask the wiki",
+			callback: () => {
+				new CustomPromptModal(
+					this.app,
+					(question) => this.runPipeline(QUERY_PROMPT_PREFIX + question, "Query"),
+					{
+						title: "Ask the wiki",
+						blurb:
+							"Sunny answers from the wiki, and opens the cited source when the " +
+							"question turns on a figure, date or quotation.",
+						placeholder: "What do you want to know?",
+					},
+				).open();
+			},
 		});
 
 		this.addCommand({

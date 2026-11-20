@@ -11,3 +11,10 @@ declare module "*.ps1" {
 	const content: string;
 	export default content;
 }
+
+// Scaffolded JSON (e.g. the vault's opencode.json) is copied in verbatim, so it is
+// inlined as a string too. `resolveJsonModule` is off in tsconfig.json for this reason.
+declare module "*.json" {
+	const content: string;
+	export default content;
+}

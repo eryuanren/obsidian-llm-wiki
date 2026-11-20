@@ -3,9 +3,16 @@ import { App, normalizePath } from "obsidian";
 // Scaffold source-of-truth files, inlined as strings at build time (esbuild `text`
 // loader). These are byte-for-byte the same files that init-wiki.ps1 embeds.
 import agentsMd from "./scaffold/AGENTS.md";
+import schemaMd from "./scaffold/schema.md";
+import opencodeJson from "./scaffold/opencode.json";
+import cmdWikiBuildMd from "./scaffold/cmd-wiki-build.md";
+import cmdWikiIngestMd from "./scaffold/cmd-wiki-ingest.md";
+import cmdWikiLintMd from "./scaffold/cmd-wiki-lint.md";
+import cmdWikiQueryMd from "./scaffold/cmd-wiki-query.md";
 import workflowMd from "./scaffold/WORKFLOW.md";
 import readmeMd from "./scaffold/README.md";
 import toolsReadmeMd from "./scaffold/tools-README.md";
+import commonPs1 from "./scaffold/_common.ps1";
 import buildPs1 from "./scaffold/build.ps1";
 import checkDuplicatePs1 from "./scaffold/check-duplicate.ps1";
 import convertAllPs1 from "./scaffold/convert-all.ps1";
@@ -28,6 +35,10 @@ const FOLDERS = [
 	"inbox",
 	"processed",
 	"tools",
+	".llm-wiki",
+	".opencode",
+	".opencode/llm-wiki",
+	".opencode/commands",
 	"wiki",
 	"wiki/entities",
 	"wiki/concepts",
@@ -48,14 +59,26 @@ const GITKEEP_FOLDERS = [
 ];
 
 /**
- * Methodology / tooling files. Safe to overwrite when the user re-runs setup with
- * "overwrite" (e.g. to pick up updated tool scripts). They contain no user data.
+ * Plugin-owned methodology / tooling files. Safe to overwrite when the user re-runs
+ * setup with "overwrite" (e.g. to pick up updated tool scripts). They contain no user
+ * data and no user-authored rules.
+ *
+ * The wiki's schema lives here, in `.opencode/llm-wiki/schema.md`, NOT in AGENTS.md.
+ * AGENTS.md is the file the user and Sunny co-evolve, so updating the plugin must never
+ * be able to overwrite it; it is seeded once (below) and then left alone. Sunny reads
+ * the schema because AGENTS.md points at it, and because `.opencode/opencode.json`
+ * lists it under `instructions`.
  */
 const SCAFFOLD_FILES: Record<string, string> = {
-	"AGENTS.md": agentsMd,
+	".opencode/llm-wiki/schema.md": schemaMd,
+	".opencode/commands/wiki-build.md": cmdWikiBuildMd,
+	".opencode/commands/wiki-ingest.md": cmdWikiIngestMd,
+	".opencode/commands/wiki-lint.md": cmdWikiLintMd,
+	".opencode/commands/wiki-query.md": cmdWikiQueryMd,
 	"WORKFLOW.md": workflowMd,
 	"README.md": readmeMd,
 	"tools/README.md": toolsReadmeMd,
+	"tools/_common.ps1": commonPs1,
 	"tools/build.ps1": buildPs1,
 	"tools/check-duplicate.ps1": checkDuplicatePs1,
 	"tools/convert-all.ps1": convertAllPs1,
@@ -76,13 +99,19 @@ function today(): string {
 }
 
 /**
- * Seed pages that may accumulate user/agent data. These are written only when
- * missing and are NEVER overwritten, so a re-run can't wipe an existing wiki's
+ * Seed files that may accumulate user or agent content. Written only when missing and
+ * NEVER overwritten, so a re-run can't wipe an existing wiki's schema customisations,
  * index, activity log, or processed-files audit table.
  */
 function seedFiles(): Record<string, string> {
 	const date = today();
 	return {
+		// The user's own rules. The plugin-owned schema it points at is overwritable;
+		// this file is not.
+		"AGENTS.md": agentsMd,
+		// Makes Sunny load the schema as a project instruction. Seeded, not overwritten,
+		// because the user may add their own provider/model settings to it.
+		".opencode/opencode.json": opencodeJson,
 		"wiki/index.md": [
 			"# Wiki Index",
 			"",
@@ -122,14 +151,18 @@ function seedFiles(): Record<string, string> {
 		"wiki/processed.md": [
 			"# Processed Files Log",
 			"",
-			"*Tracks which source files have been ingested to prevent duplicates*",
+			"*Tracks which source files have been ingested to prevent duplicates.*",
+			"",
+			"*`Hash` is a short SHA-256 of the raw source's contents. Dedupe matches on it,",
+			"not on the filename: a renamed source is still recognised as ingested, and an",
+			"edited one is recognised as new.*",
 			"",
 			"---",
 			"",
 			"## Ingested Sources",
 			"",
-			"| Date | File | Status | Notes |",
-			"|------|------|--------|-------|",
+			"| Date | File | Source | Hash | Status | Notes |",
+			"|------|------|--------|------|--------|-------|",
 			"",
 			"---",
 			"",

@@ -1,6 +1,13 @@
 #!/usr/bin/env pwsh
-# Add a `sunny` function to your PowerShell profile so you can run wiki commands
-# from anywhere (e.g. `sunny -Ingest`, `sunny -Status`).
+# Add a `sunny` function to your PowerShell profile so you can drive the wiki from
+# anywhere (e.g. `sunny -Ingest`, `sunny -Status`).
+#
+# Note on the name: PowerShell resolves functions ahead of executables, so this function
+# shadows the sunny CLI inside your shell. That used to break the pipeline, because the
+# tool scripts call the CLI to do the real work and would reach this wrapper instead.
+# They no longer look the command up that way - Resolve-SunnyCli in _common.ps1 accepts
+# only an actual executable - so the function and the CLI coexist safely.
+#
 # Usage: ./tools/install-alias.ps1
 
 $ErrorActionPreference = "Stop"
@@ -28,3 +35,4 @@ Add-Content -Path $PROFILE -Value "`n$block`n"
 Write-Host "Added 'sunny' function to $PROFILE" -ForegroundColor Green
 Write-Host "Reload with:  . `$PROFILE   (or open a new terminal)" -ForegroundColor Yellow
 Write-Host "Then use:     sunny -Ingest | sunny -Status | sunny -Prompt 'lint the wiki'" -ForegroundColor Gray
+Write-Host "The sunny CLI itself stays reachable to the tool scripts." -ForegroundColor Gray
